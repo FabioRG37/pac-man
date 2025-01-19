@@ -13,8 +13,8 @@ public class Enemy extends Rectangle {
     private int dir = -1;
     public Random randomGen;
     private int time = 0;
-    private int targetTime = 60 * 4;
-    private int spd = 3;
+    private int targetTime = 60 * 2;
+    private int spd = 2;
     private int lastDir = -1;
 
     public Enemy(int x, int y) {
@@ -99,7 +99,7 @@ public class Enemy extends Rectangle {
                 state = find_path;
             }
             time++;
-            if (time == targetTime) {
+            if (time == targetTime*2) {
                 state = random;
                 time = 0;
             }

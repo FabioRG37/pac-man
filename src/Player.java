@@ -27,7 +27,7 @@ public class Player extends Rectangle {
             }
         }
 
-        if (level.apples.isEmpty()) {
+        if (level.apples.size() == 0) {
             //End game, you won!
             Game.player = new Player(0,0);
             Game.level = new Level("/map/map.png");
