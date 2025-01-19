@@ -28,6 +28,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
         player = new Player(Game.HEIGHT / 2, Game.HEIGHT / 2);
         level = new Level("/map/map.png");
         spriteSheet = new SpriteSheet("/sprites/spritesheet.png");
+
+        new Texture();
     }
 
     public synchronized void start() {

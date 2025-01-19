@@ -40,7 +40,7 @@ public class Level {
                     } else if (val == 0xFFED1C24) {
                         //Enemy
                         enemies.add(new Enemy(xx * 32, yy * 32));
-                    } else if (val == 0xFFFFF200) {
+                    } else if (val == 0xFFFFFFFF) {
                         //FRUIT
                         apples.add(new Apple(xx * 32, yy * 32));
                     }

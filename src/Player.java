@@ -29,6 +29,13 @@ public class Player extends Rectangle {
 
         if (level.apples.isEmpty()) {
             //End game, you won!
+            Game.player = new Player(0,0);
+            Game.level = new Level("/map/map.png");
+            return;
+        }
+        for (int i = 0; i < Game.level.enemies.size(); i++) {
+            Enemy en = Game.level.enemies.get(i);
+            if (en.intersects(this)) System.exit(1);
         }
     }
 
@@ -49,7 +56,6 @@ public class Player extends Rectangle {
     }
 
     public void render(Graphics g) {
-        SpriteSheet sheet = Game.spriteSheet;
-        g.drawImage(sheet.getSprite(0, 0), x, y, 32, 32, null);
+        g.drawImage(Texture.player, x, y, width, height, null);
     }
 }
