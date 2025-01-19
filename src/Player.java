@@ -14,14 +14,26 @@ public class Player extends Rectangle {
     }
 
     public void tick() {
-        if (right && canMove(x + speed,y)) x += speed;
-        if (left && canMove(x - speed,y)) x -= speed;
-        if (up && canMove(x,y - speed)) y -= speed;
+        if (right && canMove(x + speed, y)) x += speed;
+        if (left && canMove(x - speed, y)) x -= speed;
+        if (up && canMove(x, y - speed)) y -= speed;
         if (down && canMove(x, y + speed)) y += speed;
+
+        Level level = Game.level;
+        for (int i = 0; i < level.apples.size(); i++) {
+            if (this.intersects(level.apples.get(i))) {
+                level.apples.remove(i);
+                break;
+            }
+        }
+
+        if (level.apples.isEmpty()) {
+            //End game, you won!
+        }
     }
 
-    private boolean canMove(int nestx, int nexty) {
-        Rectangle bounds = new Rectangle(nestx, nexty, width, height);
+    private boolean canMove(int nextx, int nexty) {
+        Rectangle bounds = new Rectangle(nextx, nexty, width, height);
         Level level = Game.level;
 
         for (int xx = 0; xx < level.tiles.length; xx++) {
@@ -37,7 +49,7 @@ public class Player extends Rectangle {
     }
 
     public void render(Graphics g) {
-        g.setColor(Color.YELLOW);
-        g.fillRect(x, y, width, height);
+        SpriteSheet sheet = Game.spriteSheet;
+        g.drawImage(sheet.getSprite(0, 0), x, y, 32, 32, null);
     }
 }
