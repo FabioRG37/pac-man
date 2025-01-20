@@ -22,20 +22,27 @@ public class Player extends Rectangle {
         Level level = Game.level;
         for (int i = 0; i < level.apples.size(); i++) {
             if (this.intersects(level.apples.get(i))) {
+                Game.points++;
                 level.apples.remove(i);
                 break;
             }
         }
 
-        if (level.apples.size() == 0) {
+        if (level.apples.isEmpty()) {
             //End game, you won!
-            Game.player = new Player(0,0);
-            Game.level = new Level("/map/map.png");
+//            Game.player = new Player(0,0);
+//            Game.level = new Level("/map/map.png");
+            Game.STATE = Game.PAUSE_SCREEN;
             return;
         }
         for (int i = 0; i < Game.level.enemies.size(); i++) {
             Enemy en = Game.level.enemies.get(i);
-            if (en.intersects(this)) System.exit(1);
+            if (en.intersects(this)) {
+                // System.exit(1);
+                //Menu System
+                Game.points = 0;
+                Game.STATE = Game.PAUSE_SCREEN;
+            }
         }
     }
 

@@ -18,6 +18,16 @@ public class Game extends Canvas implements Runnable, KeyListener {
     public static Level level;
     public static SpriteSheet spriteSheet;
 
+    public static final int PAUSE_SCREEN = 0, GAME = 1;
+    public static int STATE = -1;
+    public boolean isEnter = false;
+
+    private int time = 0;
+    private int targetFrames = 35;
+    private boolean showText = true;
+
+    public static int points;
+
     public Game() {
         Dimension dimension = new Dimension(Game.WIDTH, Game.HEIGHT);
         setPreferredSize(dimension);
@@ -25,9 +35,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
         setMaximumSize(dimension);
 
         addKeyListener(this);
+
+        STATE = PAUSE_SCREEN;
+
         player = new Player(Game.HEIGHT / 2, Game.HEIGHT / 2);
         level = new Level("/map/map.png");
         spriteSheet = new SpriteSheet("/sprites/spritesheet.png");
+
+        points = 0;
 
         new Texture();
     }
@@ -51,11 +66,32 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
     private void tick() {
-        player.tick();
-        level.tick();
+        if (STATE == GAME) {
+            player.tick();
+            level.tick();
+        } else if (STATE == PAUSE_SCREEN) {
+            time++;
+            if (time == targetFrames) {
+                time = 0;
+                if (showText) {
+                    showText = false;
+                } else {
+                    showText = true;
+                }
+            }
+            if (isEnter) {
+                isEnter = false;
+                player = new Player(Game.HEIGHT / 2, Game.HEIGHT / 2);
+                level = new Level("/map/map.png");
+                spriteSheet = new SpriteSheet("/sprites/spritesheet.png");
+
+                STATE = GAME;
+            }
+        }
     }
 
     private void render() {
+        requestFocus();
         BufferStrategy bs = getBufferStrategy();
         if (bs == null) {
             createBufferStrategy(3);
@@ -65,15 +101,33 @@ public class Game extends Canvas implements Runnable, KeyListener {
         Graphics g = bs.getDrawGraphics();
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
-        player.render(g);
-        level.render(g);
+        if (STATE == GAME) {
+            player.render(g);
+            level.render(g);
+            g.setColor(Color.YELLOW);
+            g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+            g.drawString("Points: " + points, 278, 471);
+        } else if (STATE == PAUSE_SCREEN) {
+            int boxWidht = 500;
+            int boxHeight = 200;
+            int xx = Game.WIDTH / 2 - boxWidht / 2;
+            int yy = Game.HEIGHT / 2 - boxHeight / 2;
+            g.setColor(new Color(0, 0, 150));
+            g.fillRect(xx, yy, boxWidht, boxHeight);
+
+            g.setColor(Color.WHITE);
+            g.setFont(new Font(Font.DIALOG, Font.BOLD, 26));
+            if (showText) {
+                g.drawString("Press ENTER to start the game", xx + 60, yy + 96);
+                g.drawString("Press ESC to close the game", xx + 60, yy + 120);
+            }
+        }
         g.dispose();
         bs.show();
     }
 
     @Override
     public void run() {
-        requestFocus();
         int fps = 0;
         double timer = System.currentTimeMillis();
         long lastTime = System.nanoTime();
@@ -124,10 +178,20 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) player.right = true;
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) player.left = true;
-        if (e.getKeyCode() == KeyEvent.VK_UP) player.up = true;
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) player.down = true;
+        if (STATE == GAME) {
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) player.right = true;
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) player.left = true;
+            if (e.getKeyCode() == KeyEvent.VK_UP) player.up = true;
+            if (e.getKeyCode() == KeyEvent.VK_DOWN) player.down = true;
+        } else if (STATE == PAUSE_SCREEN) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                STATE = GAME;
+                isEnter = true;
+            }
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                System.exit(1);
+            }
+        }
     }
 
     @Override
