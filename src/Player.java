@@ -45,10 +45,9 @@ public class Player extends Rectangle {
         for (int i = 0; i < Game.level.enemies.size(); i++) {
             Enemy en = Game.level.enemies.get(i);
             if (en.intersects(this)) {
-                // System.exit(1);
-                //Menu System
                 Game.points = 0;
                 Game.STATE = Game.PAUSE_SCREEN;
+                break;
             }
         }
         time++;

@@ -106,7 +106,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
             level.render(g);
             g.setColor(Color.YELLOW);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+            g.drawString("Press ESC to Menu", 32, 22);
             g.drawString("Points: " + points, 278, 471);
+            //g.drawString("Lives: " + Player.lives, 32, 471);
         } else if (STATE == PAUSE_SCREEN) {
             int boxWidht = 500;
             int boxHeight = 200;
@@ -183,6 +185,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) player.left = true;
             if (e.getKeyCode() == KeyEvent.VK_UP) player.up = true;
             if (e.getKeyCode() == KeyEvent.VK_DOWN) player.down = true;
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) STATE = PAUSE_SCREEN;
         } else if (STATE == PAUSE_SCREEN) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 STATE = GAME;

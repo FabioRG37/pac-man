@@ -35,16 +35,21 @@ public class Level {
                         tiles[xx][yy] = new Tile(xx * 32, yy * 32);
                     } else if (val == 0xFF0000FF) {
                         //Player
-                        Game.player.x = xx * 32;
-                        Game.player.y = yy * 32;
+                        //Game.player.x = xx * 32;
+                        //Game.player.y = yy * 32;
                     } else if (val == 0xFFED1C24) {
                         //Enemy
-                        enemies.add(new Enemy(xx * 32, yy * 32));
+                        //enemies.add(new Enemy(xx * 32, yy * 32));
                     } else if (val == 0xFFFFFFFF) {
                         //FRUIT
                         apples.add(new Apple(xx * 32, yy * 32));
                     }
                 }
+            }
+            Game.player.x = 320;
+            Game.player.y = 352;
+            for (int e = 0; e < 4; e ++) {
+                enemies.add(new Enemy(288, 192));
             }
 
         } catch (IOException e) {
