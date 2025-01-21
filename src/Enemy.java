@@ -12,10 +12,10 @@ public class Enemy extends Rectangle {
     private int right = 0, left = 1, up = 2, down = 3;
     private int dir = -1;
     public Random randomGen;
-    private int time = 0;
-    private int targetTime = 60 * 2;
+    private int time = 0, timeIndex = 0;
+    private int targetTime = 60 * 2, targetTimeIndex = 18, imageIndex = 0;
     private int spd = 2;
-    private int lastDir = -1;
+    private int lastDir = -1, lastSprite = 1;
 
     public Enemy(int x, int y) {
         randomGen = new Random();
@@ -28,13 +28,19 @@ public class Enemy extends Rectangle {
 
             if (dir == right) {
                 if (canMove(x + spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x += spd;
+                    if (randomGen.nextInt(100) > 50){
+                        lastSprite = 1;
+                        x += spd;
+                    }
                 } else {
                     dir = randomGen.nextInt(4);
                 }
             } else if (dir == left) {
                 if (canMove(x - spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x -= spd;
+                    if (randomGen.nextInt(100) > 50) {
+                        lastSprite = -1;
+                        x -= spd;
+                    }
                 } else {
                     dir = randomGen.nextInt(4);
                 }
@@ -53,9 +59,14 @@ public class Enemy extends Rectangle {
 
             }
             time++;
+            timeIndex++;
             if (time == targetTime) {
                 state = smart;
                 time = 0;
+            }
+            if (timeIndex == targetTimeIndex) {
+                timeIndex = 0;
+                imageIndex++;
             }
         } else if (state == smart) {
             //follow the player
@@ -63,7 +74,10 @@ public class Enemy extends Rectangle {
 
             if (x < Game.player.x) {
                 if (canMove(x + spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x += spd;
+                    if (randomGen.nextInt(100) > 50){
+                        lastSprite = 1;
+                        x += spd;
+                    }
                     move = true;
                     lastDir = right;
                 }
@@ -71,7 +85,10 @@ public class Enemy extends Rectangle {
 
             if (x > Game.player.x) {
                 if (canMove(x - spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x -= spd;
+                    if (randomGen.nextInt(100) > 50) {
+                        lastSprite = -1;
+                        x -= spd;
+                    }
                     move = true;
                     lastDir = left;
                 }
@@ -99,9 +116,14 @@ public class Enemy extends Rectangle {
                 state = find_path;
             }
             time++;
-            if (time == targetTime*2) {
-                state = random;
+            timeIndex++;
+            if (time == targetTime) {
+                state = smart;
                 time = 0;
+            }
+            if (timeIndex == targetTimeIndex) {
+                timeIndex = 0;
+                imageIndex++;
             }
         } else if (state == find_path) {
 
@@ -118,7 +140,10 @@ public class Enemy extends Rectangle {
                     }
                 }
                 if (canMove(x + spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x += spd;
+                    if (randomGen.nextInt(100) > 50) {
+                        lastSprite = 1;
+                        x += spd;
+                    }
                 }
             } else if (lastDir == left) {
                 if (y < Game.player.y) {
@@ -133,16 +158,25 @@ public class Enemy extends Rectangle {
                     }
                 }
                 if (canMove(x - spd, y)) {
-                    if (randomGen.nextInt(100) > 50) x -= spd;
+                    if (randomGen.nextInt(100) > 50) {
+                        lastSprite = -1;
+                        x -= spd;
+                    }
                 }
             } else if (lastDir == up) {
                 if (x < Game.player.x) {
                     if (canMove(x + spd, y)) {
-                        if (randomGen.nextInt(100) > 50) x += spd;
+                        if (randomGen.nextInt(100) > 50) {
+                            lastSprite = 1;
+                            x += spd;
+                        }
                         state = smart;
                     } else {
                         if (canMove(x - spd, y)) {
-                            if (randomGen.nextInt(100) > 50) x -= spd;
+                            if (randomGen.nextInt(100) > 50) {
+                                lastSprite = -1;
+                                x -= spd;
+                            }
                             state = smart;
                         }
                     }
@@ -153,11 +187,17 @@ public class Enemy extends Rectangle {
             } else if (lastDir == down) {
                 if (x < Game.player.x) {
                     if (canMove(x + spd, y)) {
-                        if (randomGen.nextInt(100) > 50) x += spd;
+                        if (randomGen.nextInt(100) > 50) {
+                            lastSprite = 1;
+                            x += spd;
+                        }
                         state = smart;
                     } else {
                         if (canMove(x - spd, y)) {
-                            if (randomGen.nextInt(100) > 50) x -= spd;
+                            if (randomGen.nextInt(100) > 50) {
+                                lastSprite = -1;
+                                x -= spd;
+                            }
                             state = smart;
                         }
                     }
@@ -167,9 +207,14 @@ public class Enemy extends Rectangle {
                 }
             }
             time++;
+            timeIndex++;
             if (time == targetTime) {
                 state = smart;
                 time = 0;
+            }
+            if (timeIndex == targetTimeIndex) {
+                timeIndex = 0;
+                imageIndex++;
             }
         }
     }
@@ -191,6 +236,7 @@ public class Enemy extends Rectangle {
     }
 
     public void render(Graphics g) {
-        g.drawImage(Texture.ghost, x, y, width, height, null);
+        if (lastSprite == 1) g.drawImage(Texture.ghost[imageIndex % 2], x, y, width, height, null);
+        else g.drawImage(Texture.ghost[imageIndex % 2], x + 32, y, -width, height, null);
     }
 }

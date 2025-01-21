@@ -8,14 +8,23 @@ public class Player extends Rectangle {
 
     public boolean right, left, up, down;
     private int speed = 4;
+    private int time = 0, targetTime = 18;
+    public int imageIndex = 0;
+    private int lastDir = 1;
 
     public Player(int x, int y) {
         setBounds(x, y, 32, 32);
     }
 
     public void tick() {
-        if (right && canMove(x + speed, y)) x += speed;
-        if (left && canMove(x - speed, y)) x -= speed;
+        if (right && canMove(x + speed, y)) {
+            x += speed;
+            lastDir = 1;
+        }
+        if (left && canMove(x - speed, y)) {
+            x -= speed;
+            lastDir = -1;
+        }
         if (up && canMove(x, y - speed)) y -= speed;
         if (down && canMove(x, y + speed)) y += speed;
 
@@ -30,8 +39,6 @@ public class Player extends Rectangle {
 
         if (level.apples.isEmpty()) {
             //End game, you won!
-//            Game.player = new Player(0,0);
-//            Game.level = new Level("/map/map.png");
             Game.STATE = Game.PAUSE_SCREEN;
             return;
         }
@@ -43,6 +50,11 @@ public class Player extends Rectangle {
                 Game.points = 0;
                 Game.STATE = Game.PAUSE_SCREEN;
             }
+        }
+        time++;
+        if (time == targetTime) {
+            time = 0;
+            imageIndex++;
         }
     }
 
@@ -63,6 +75,7 @@ public class Player extends Rectangle {
     }
 
     public void render(Graphics g) {
-        g.drawImage(Texture.player, x, y, width, height, null);
+        if (lastDir == 1) g.drawImage(Texture.player[imageIndex % 2], x, y, width, height, null);
+        else g.drawImage(Texture.player[imageIndex % 2], x + 32, y, -width, height, null);
     }
 }
