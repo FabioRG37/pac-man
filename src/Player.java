@@ -11,6 +11,7 @@ public class Player extends Rectangle {
     private int time = 0, targetTime = 18;
     public int imageIndex = 0;
     private int lastDir = 1;
+    private Sound sounds = new Sound();
 
     public Player(int x, int y) {
         setBounds(x, y, 32, 32);
@@ -31,6 +32,7 @@ public class Player extends Rectangle {
         Level level = Game.level;
         for (int i = 0; i < level.apples.size(); i++) {
             if (this.intersects(level.apples.get(i))) {
+                sounds.ponto();
                 Game.points++;
                 level.apples.remove(i);
                 break;
@@ -45,6 +47,7 @@ public class Player extends Rectangle {
         for (int i = 0; i < Game.level.enemies.size(); i++) {
             Enemy en = Game.level.enemies.get(i);
             if (en.intersects(this)) {
+                sounds.hit();
                 Game.points = 0;
                 Game.STATE = Game.PAUSE_SCREEN;
                 break;
