@@ -63,17 +63,18 @@ public class Player extends Rectangle {
     private boolean canMove(int nextx, int nexty) {
         Rectangle bounds = new Rectangle(nextx, nexty, width, height);
         Level level = Game.level;
+        boolean answer = true;
 
         for (int xx = 0; xx < level.tiles.length; xx++) {
             for (int yy = 0; yy < level.tiles[0].length; yy++) {
                 if (level.tiles[xx][yy] != null) {
                     if (bounds.intersects(level.tiles[xx][yy])) {
-                        return false;
+                        answer = false;
                     }
                 }
             }
         }
-        return true;
+        return answer;
     }
 
     public void render(Graphics g) {

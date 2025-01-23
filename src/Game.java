@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
@@ -7,9 +9,10 @@ import java.awt.image.BufferStrategy;
 public class Game extends Canvas implements Runnable, KeyListener {
 
     private static final long serialVersionUID = 1L;
+    private Timer timer;
     private boolean isRunning = false;
 
-    public static final int WIDTH = 640, HEIGHT = 480;
+    private static final int WIDTH = 640, HEIGHT = 480;
     public static final String TITLE = "Pac-Man";
 
     private Thread thread;
@@ -28,7 +31,25 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     public static int points;
 
+    public static int getScreenWidth(){
+        return WIDTH;
+    }
+
+    public static int getScreenHeight(){
+        return HEIGHT;
+    }
+
     public Game() {
+        timer = new Timer(16, new ActionListener(){
+            // 16ms = 60fps
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tick(); // atualiza o jogo
+                render(); // rendenizar o jogo
+            }
+
+        });
         Dimension dimension = new Dimension(Game.WIDTH, Game.HEIGHT);
         setPreferredSize(dimension);
         setMinimumSize(dimension);
@@ -48,7 +69,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
     public synchronized void start() {
-        if (isRunning) return;
+        if (isRunning) {
+            throw new IllegalArgumentException("O thread já está em execução");
+        }
         isRunning = true;
         thread = new Thread(this);
         thread.start();
@@ -62,7 +85,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
+    public void startTimer() {
+        timer.start();
+    }
+
+    public void stopTimer() {
+        timer.stop();
     }
 
     private void tick() {
@@ -97,66 +127,89 @@ public class Game extends Canvas implements Runnable, KeyListener {
             createBufferStrategy(3);
             return;
         }
-
         Graphics g = bs.getDrawGraphics();
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
-        if (STATE == GAME) {
-            player.render(g);
-            level.render(g);
-            g.setColor(Color.YELLOW);
-            g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
-            g.drawString("Press ESC to Menu", 32, 22);
-            g.drawString("Points: " + points, 278, 471);
-            //g.drawString("Lives: " + Player.lives, 32, 471);
-        } else if (STATE == PAUSE_SCREEN) {
-            int boxWidht = 500;
-            int boxHeight = 200;
-            int xx = Game.WIDTH / 2 - boxWidht / 2;
-            int yy = Game.HEIGHT / 2 - boxHeight / 2;
-            g.setColor(new Color(0, 0, 150));
-            g.fillRect(xx, yy, boxWidht, boxHeight);
-
-            g.setColor(Color.WHITE);
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 26));
-            if (showText) {
-                g.drawString("Press ENTER to start the game", xx + 60, yy + 96);
-                g.drawString("Press ESC to close the game", xx + 60, yy + 120);
-            }
-        }
+        renderBackground(g);
+        renderGameState(g);
         g.dispose();
         bs.show();
     }
 
+    private void renderBackground(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
+    }
+
+    private void renderGameState(Graphics g) {
+        if (STATE == GAME) {
+            renderGameScreen(g);
+        } else if (STATE == PAUSE_SCREEN) {
+            renderPauseScreen(g);
+        }
+    }
+
+    private void renderGameScreen(Graphics g) {
+        player.render(g);
+        level.render(g);
+        renderGameHud(g);
+    }
+
+    private void renderPauseScreen(Graphics g) {
+        int boxWidht = 500;
+        int boxHeight = 200;
+        int xx = Game.WIDTH / 2 - boxWidht / 2;
+        int yy = Game.HEIGHT / 2 - boxHeight / 2;
+        g.setColor(new Color(0, 0, 150));
+        g.fillRect(xx, yy, boxWidht, boxHeight);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font(Font.DIALOG, Font.BOLD, 26));
+        if (showText) {
+            g.drawString("Press ENTER to start the game", xx + 60, yy + 96);
+            g.drawString("Press ESC to close the game", xx + 60, yy + 120);
+        }
+    }
+
+    private void renderGameHud(Graphics g) {
+        g.setColor(Color.YELLOW);
+        g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+        g.drawString("Press ESC to Menu", 32, 22);
+        g.drawString("Points: " + points, 278, 471);
+        //g.drawString("Lives: " + Player.lives, 32, 471);
+    }
+
     @Override
     public void run() {
-        int fps = 0;
-        double timer = System.currentTimeMillis();
-        long lastTime = System.nanoTime();
-        double targetTick = 60.0;
-        double delta = 0;
-        double ns = (1000000000 / targetTick);
+        try {
+            int fps = 0;
+            double timer = System.currentTimeMillis();
+            long lastTime = System.nanoTime();
+            double targetTick = 60.0;
+            double delta = 0;
+            double ns = (1000000000 / targetTick);
 
-        while (isRunning) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / ns;
-            lastTime = now;
+            while (isRunning) {
+                long now = System.nanoTime();
+                delta += (now - lastTime) / ns;
+                lastTime = now;
 
-            while (delta >= 1) {
-                tick();
-                render();
-                fps++;
-                delta--;
+                while (delta >= 1) {
+                    tick();
+                    render();
+                    fps++;
+                    delta--;
+                }
+
+                if (System.currentTimeMillis() - timer >= 1000) {
+                    System.out.println(fps);
+                    fps = 0;
+                    timer += 1000;
+                }
             }
 
-            if (System.currentTimeMillis() - timer >= 1000) {
-                System.out.println(fps);
-                fps = 0;
-                timer += 1000;
-            }
+//            stop();
+            stopTimer();
+        } catch (RuntimeException e) {
+            System.err.println("Erro durante a execução do thread: " + e.getMessage());
         }
-
-        stop();
     }
 
     public static void main(String[] args) {
@@ -170,8 +223,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
         frame.setLocationRelativeTo(null);
 
         frame.setVisible(true);
+        game.startTimer();
 
-        game.start();
+//        try {
+//            game.start();
+//        } catch (IllegalArgumentException e) {
+//            System.err.println(e.getMessage());
+//        }
     }
 
     @Override
